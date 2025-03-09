@@ -14,11 +14,11 @@ export class User {
     userPassword: string;
     @Column("simple-array",{ default: "Employee"})
     userRoles: string[];
+    
     @OneToOne(()=> Manager)
     manager: Manager;
 
-    @OneToOne(()=> Employee,{
-    eager: true})
+    @OneToOne(()=> Employee)
     employee: Employee;
 
 }
