@@ -4,6 +4,9 @@ import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { UserData } from 'src/auth/decorators/user.decorator';
+import { User } from 'src/auth/entities/user.entity';
+import { UnauthorizedException } from '@nestjs/common';
 
 @UseGuards(AuthGuard)
 @Controller('providers')
@@ -16,7 +19,8 @@ export class ProvidersController {
   }
 
   @Get()
-  findAll() {
+  findAll(@UserData() user: User) {
+    if (user.userRoles.includes('Employee'))throw new UnauthorizedException('No estas autorizado');
     return this.providersService.findAll();
   }
 

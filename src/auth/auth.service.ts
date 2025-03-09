@@ -21,7 +21,7 @@ export class AuthService {
 async loginUser(loginUserDto: LoginUserDto){
   const user =await  this.userRepository.findOne({
     where: {
-      userEmail  : loginUserDto.userEmail
+      userEmail: loginUserDto.userEmail
     }
     });
     if (!user) {
@@ -35,8 +35,9 @@ async loginUser(loginUserDto: LoginUserDto){
       throw new UnauthorizedException('No estas autorizado');
     }
     const payload = { 
-      user: user.userEmail, 
-      password: user.userPassword 
+      userEmail: user.userEmail,
+      userPassword: user.userPassword,
+      userRoles: user.userRoles
     };
     const token = this.jwtService.sign(payload)
     return token;
