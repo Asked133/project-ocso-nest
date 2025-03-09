@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-
+import { Put } from '@nestjs/common';
+import { UpdateUserDto } from './dto/update-user.dto'; ;
 
 @Controller('auth')
 export class AuthController {
@@ -15,4 +16,8 @@ export class AuthController {
   login(@Body() loginUserDto : LoginUserDto ) {
    return  this.authService.loginUser(loginUserDto);
   } 
+  @Patch("/:email")
+  updateUser(@Param ("email") userEmail: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.authService.updateUser(userEmail, updateUserDto);
+  }
 }
