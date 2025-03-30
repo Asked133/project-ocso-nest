@@ -26,6 +26,9 @@ export class LocationsService {
     const location = this.locationRepository.findOneBy({
       locationId: id,
     });
+    if (!location) {
+      throw new NotFoundException(`Location with id ${id} not found`);
+    }
     return location;
   }
 

@@ -8,6 +8,7 @@ import {
   import { JwtService } from '@nestjs/jwt';
   import { JWT_KEY } from '../constants/jwt.constants';
   import { Request } from 'express';
+  import { TOKEN_NAME } from '../constants/jwt.constants';
   
   @Injectable()
   export class AuthGuard implements CanActivate {
@@ -18,6 +19,7 @@ import {
       let token = this.extractTokenFromHeader(request);
       token = request.cookies?.token; 
       if (!token) {
+        token = request.cookies?.[TOKEN_NAME]; 
         throw new UnauthorizedException();
       }
       try {
