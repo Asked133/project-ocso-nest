@@ -1,18 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateLocationDto } from './dto/create-location.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
-import { Location } from './entities/location.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-
-
-
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { CreateLocationDto } from "./dto/create-location.dto";
+import { UpdateLocationDto } from "./dto/update-location.dto";
+import { Location } from "./entities/location.entity";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Manager } from "src/managers/entities/manager.entity";
 
 @Injectable()
 export class LocationsService {
   constructor(
     @InjectRepository(Location)
     private locationRepository: Repository<Location>,
+    @InjectRepository(Manager)
+    private managerRepository: Repository<Manager>
   ) {}
   create(createLocationDto: CreateLocationDto) {
     return this.locationRepository.save(createLocationDto);
@@ -33,13 +33,30 @@ export class LocationsService {
   }
 
   async update(id: number, updateLocationDto: UpdateLocationDto) {
-    const locationToUpdate = await this.locationRepository.preload({
+    await this.managerRepository
+      .createQueryBuilder()
+      .update()
+      .set({ location: null as any })
+      .where("locationId = :id", { id })
+      .execute();
+    const location = await this.locationRepository.preload({
       locationId: id,
-      ...updateLocationDto,
-      });
-    if (!locationToUpdate) throw new NotFoundException();
-    this.locationRepository.save(locationToUpdate);
-    return locationToUpdate;
+      ...updateLocationDto, 
+    });
+    if (!location) {
+      throw new NotFoundException();
+    }
+    const savedLocation = await this.locationRepository.save(location);
+    
+    const updatedManager = await this.managerRepository.preload({
+      managerId: updateLocationDto.manager?.managerId,
+      location: location, 
+    })
+        if (!updatedManager) {
+      throw new NotFoundException();
+    }
+    this.managerRepository.save(updatedManager);
+    return savedLocation;
   }
 
   remove(id: number) {
@@ -47,7 +64,7 @@ export class LocationsService {
       locationId: id,
     });
     return {
-      message: 'Location deleted',
+      message: "Location deleted",
     };
   }
 }
