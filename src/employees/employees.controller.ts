@@ -21,28 +21,31 @@ export class EmployeesController {
     status: 201,
     example: {
       employeeId: "UUID",
-      employeeName: "Diego",
-      employeeEmail: "dcgomesawr@hotmail.com",
+      employeeName: "Cesar",
+      employeeEmail: "dcgoerm@gmail.com",
       employeeLastName: "Gomez",
-      employeePhoneNumber: "5546887840",
-      user: {
-        userId: "UUID",
-        username: "diego",
-        email: "dcgomesawr@hotmail.com"
-      }
-    } as unknown as Employee
+      phoneNumber: "5546887840",
+    }
   })
 
   @Post()
-  create(@Body() createEmployeeDto: CreateEmployeeDto) {
+  @UseInterceptors(FileInterceptor("employeePhoto"))
+  async create(@Body() createEmployeeDto: CreateEmployeeDto, @UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      return this.employeesService.create(createEmployeeDto);
+    } else {
+      const photoUrl = await this.awsService.uploadFile(file);
+      createEmployeeDto.employeePhoto = photoUrl;
+      return this.employeesService.create(createEmployeeDto);
+    }
     return this.employeesService.create(createEmployeeDto);
   }
 
   @Auth(ROLES.EMPLOYEE, ROLES.MANAGER)
   @Post(':id/upload')
-  @UseInterceptors(FileInterceptor('file', {
-    dest: './src/employees/employees-photos'
-  }))
+  @UseInterceptors(FileInterceptor("file"))
+
+
   async uploadPhoto(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
     const response = await this.awsService.uploadFile(file);
     return this.employeesService.update(id, {
@@ -64,18 +67,22 @@ export class EmployeesController {
   ) {
     return this.employeesService.findOne(id);
   }
-
   @Auth(ROLES.EMPLOYEE)
   @UseInterceptors(FileInterceptor("employeePhoto"))
   @Patch(':id')
   async update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateEmployeeDto: UpdateEmployeeDto,
-    @UploadedFile() employeePhoto: Express.Multer.File,
+    @UploadedFile() file : Express.Multer.File,
   ) {
-    const fileUrl = await this.awsService.uploadFile(employeePhoto);
-    updateEmployeeDto.employeePhoto = fileUrl;
-    return this.employeesService.update(id, updateEmployeeDto);
+    if (file.originalname == "undefined") {
+      return this.employeesService.update(id, updateEmployeeDto);
+    } else {
+      const fileUrl = await this.awsService.uploadFile(file);
+      updateEmployeeDto.employeePhoto = fileUrl;
+      return this.employeesService.update(id, updateEmployeeDto);
+    }
+
   }
 
   @Delete(':id')

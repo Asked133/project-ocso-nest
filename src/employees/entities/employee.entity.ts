@@ -12,7 +12,7 @@ export class Employee {
     @Column({type: "text"})
     employeeLastName: string;
     @Column({type: "text"})
-    employeePhoneNumber: string;
+    phoneNumber: string;
     @Column( "text",{
         unique: true
     })
@@ -27,7 +27,7 @@ export class Employee {
     @JoinColumn({
         name: "locationId"
     })
-    location: Location;
+    location: Location | string;
 
     @OneToOne(()=> User)
     @JoinColumn({
@@ -35,5 +35,3 @@ export class Employee {
     })
     user: User;
 }
-
-
