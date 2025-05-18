@@ -9,44 +9,48 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class ManagersService {
-  constructor(
+    constructor(
     @InjectRepository(Manager)
     private managerRepository: Repository<Manager>,
-  ) {}
-  create(createManagerDto: CreateManagerDto) {
+    ) {}
+create(createManagerDto: CreateManagerDto) {
     return this.managerRepository.save(createManagerDto);
-  }
+}
 
-  findAll() {
-    return this.managerRepository.find({relations: {location: true}});
-  }
+findAll() {
+    return this.managerRepository.find({relations: {
+        location:true
+    }});
+}
 
-  findOne(id: string) {
-  const manager = this.managerRepository.findOne({
-    where: { managerId: id },
+findOne(id: string) {
+    const manager =this.managerRepository.findOne({
+    where: {managerId: id},
     relations: {
-      location: true,
-    },
-  });
-  if (!manager) { throw new NotFoundException("Manager not found") }
-  return manager;
-  }
+        location:true,
+        user:true
+    }
 
-  async update(id: string, updateManagerDto: UpdateManagerDto) {
+});
+if (!manager) { throw new NotFoundException("Manager not found") }
+return manager;
+}
+
+async update(id: string, updateManagerDto: UpdateManagerDto) {
     const managerToUpdate = await this.managerRepository.preload({
-      managerId: id,
-      ...updateManagerDto,
+    managerId: id,
+    ...updateManagerDto,
     });
     if (!managerToUpdate) throw new NotFoundException()
     return this.managerRepository.save(managerToUpdate);
-  }
+}
 
-  remove(id: string) {
+remove(id: string) {
     return this.managerRepository.delete({
-      managerId: id,
+    managerId: id,
     });
     return {
-      message: 'Manager deleted',
+    message: 'Manager deleted',
     };
   }
 }

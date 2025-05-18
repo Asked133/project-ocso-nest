@@ -16,19 +16,6 @@ export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     @Post("register/:id")
-
-
-
-
-
-
-
-
-
-
-
-
-
     registerManager(
         @Query("role") role: string,
         @Body() CreateUserDto: CreateUserDto,
@@ -56,8 +43,8 @@ export class AuthController {
         });
         return;
     }
-    @Patch("/:email")
-    updateUser(@Param("email") userEmail: string, @Body() updateUserDto: UpdateUserDto) {
+    @Patch("/:id")
+    updateUser(@Param("id") userEmail: string, @Body() updateUserDto: UpdateUserDto) {
         return this.authService.updateUser(userEmail, updateUserDto);
     }
 }
